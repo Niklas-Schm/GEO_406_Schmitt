@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 import bcrypt
@@ -15,10 +15,15 @@ cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        name TEXT NOT NULL,
+        surname TEXT NOT NULL
     )
 ''')
 conn.commit()
+
+admin_name = 'admin'
+admin_password = 'admin'
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -26,6 +31,11 @@ def index():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+
+        if username == admin_name:
+            if password == admin_password:
+                session['username'] = username
+                return redirect(url_for('view_database'))
 
         # Daten aus der Datenbank abrufen
         cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
@@ -41,7 +51,7 @@ def index():
         else:
             return render_template('register.html', error='User does not exist')
 
-    return render_template('register.html')
+    return render_template('index_login_db.html')
 
 
 @app.route('/dashboard')
@@ -64,9 +74,11 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        name = request.form['name']
+        surname = request.form['surname']
 
         try:
-            # Überprüfen, ob der Benutzer bereits existiert
+            # Check if the user already exists
             cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
             existing_user = cursor.fetchone()
 
@@ -78,9 +90,10 @@ def register():
                 else:
                     return render_template('register.html', error='Invalid password. Please log in.')
 
-            # Passwort hashen und in die Datenbank einfügen
+            # Hash the password and insert into the database
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, hashed_password))
+            cursor.execute('INSERT INTO users (username, password, name, surname) VALUES (?, ?, ?, ?)',
+                           (username, hashed_password, name, surname))
             conn.commit()
 
             session['username'] = username  # Create a session upon successful registration
@@ -91,6 +104,17 @@ def register():
             return render_template('register.html', error='An error occurred during registration')
 
     return render_template('register.html')
+
+
+@app.route('/admin/database')
+def view_database():
+    if 'username' in session and session['username'] == 'admin':
+        cursor.execute('SELECT * FROM users')
+        users = cursor.fetchall()
+        # Fetch all users from the database
+        return render_template('database.html', users=users)
+    else:
+        return redirect(url_for('index'))
 
 
 app.run()
