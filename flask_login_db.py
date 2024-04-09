@@ -1,6 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
-from werkzeug.security import generate_password_hash, check_password_hash
 import bcrypt
 
 app = Flask(__name__, template_folder='template')
