@@ -37,6 +37,22 @@
         tr:hover {
             background-color: #ddd;
         }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            text-decoration: none;
+            color: white;
+            background-color: #333;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-edit {
+            background-color: #4CAF50;
+        }
+        .btn-delete {
+            background-color: #f44336;
+        }
     </style>
 </head>
 <body>
@@ -49,7 +65,7 @@
                 <th>Password</th>
                 <th>Vorname</th>
                 <th>Nachname</th>
-                <!-- Add more table headers as needed -->
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -60,7 +76,10 @@
                 <td>{{ user[2] }}</td>
                 <td>{{ user[3] }}</td>
                 <td>{{ user[4] }}</td>
-                <!-- Add more table cells as needed -->
+                <td>
+                    <a href="/edit/{{ user[0] }}" class="btn btn-edit">Edit</a>
+                    <a href="/delete/{{ user[0] }}" class="btn btn-delete">Delete</a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

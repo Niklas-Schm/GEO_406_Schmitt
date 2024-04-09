@@ -118,4 +118,37 @@ def view_database():
         return redirect(url_for('index'))
 
 
+@app.route('/edit/<int:user_id>', methods=['GET', 'POST'])
+def edit(user_id):
+    if request.method == 'POST':
+        password = request.form['password']
+        name = request.form['name']
+        surname = request.form['surname']
+
+        # Hash the password and insert into the database
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        if password:
+            cursor.execute('UPDATE users SET password=?, name=?, surname=? WHERE id=?',
+                           (hashed_password, name, surname, user_id))
+        else:
+            cursor.execute('UPDATE users SET name=?, surname=? WHERE id=?',
+                           (name, surname, user_id))
+
+        conn.commit()
+
+        return redirect(url_for('view_database'))
+
+    cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
+    user = cursor.fetchone()
+    return render_template('edit.html', user=user)
+
+
+@app.route('/delete/<int:user_id>')
+def delete(user_id):
+    cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
+    conn.commit()
+
+    return redirect(url_for('view_database'))
+
+
 app.run()
