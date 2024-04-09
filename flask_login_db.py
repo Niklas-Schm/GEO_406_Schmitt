@@ -36,6 +36,8 @@ def index():
             if password == admin_password:
                 session['username'] = username
                 return redirect(url_for('view_database'))
+            else:
+                return render_template('index_login_db.html', error='Invalid password')
 
         # Daten aus der Datenbank abrufen
         cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
