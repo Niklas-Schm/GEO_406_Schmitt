@@ -155,6 +155,5 @@ def delete(user_id):
 def create_user():
     return render_template('register.html')
 
-# dash button in admin page
 
 app.run()
