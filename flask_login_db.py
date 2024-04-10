@@ -151,4 +151,10 @@ def delete(user_id):
     return redirect(url_for('view_database'))
 
 
+@app.route('/create_user')
+def create_user():
+    return render_template('register.html')
+# logout button bei database machen
+# dash button in admin page
+
 app.run()
