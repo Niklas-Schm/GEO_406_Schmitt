@@ -37,6 +37,11 @@
         tr:hover {
             background-color: #ddd;
         }
+        .btn-container{
+            display: flex;
+            justify-content: center;
+            margin: 10px;
+        }
         .btn {
             display: inline-block;
             padding: 8px 16px;
@@ -75,8 +80,11 @@
 </head>
 <body>
     <h1>User Database</h1>
-    <a href="/create_user" class="btn btn-create" style="margin: 20px;">Create User</a>
-    <a href="/logout" class="btn btn-logout" style="margin: 20px;">Logout</a>
+    <div class="btn-container">
+        <a href="/create_user" class="btn btn-create" style="margin: 20px;">Create User</a>
+        <a href="/logout" class="btn btn-logout" style="margin: 20px;">Logout</a>
+    </div>
+
     <table>
         <thead>
             <tr>
