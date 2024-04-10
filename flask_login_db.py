@@ -98,7 +98,7 @@ def register():
             conn.commit()
 
             session['username'] = username  # Create a session upon successful registration
-            return render_template('index_login_db.html', message='User created. Please log in.')
+            return render_template('dashboard.html', message='User created. Please log in.')
 
         except Exception as e:
             print(f"Error during registration: {e}")
