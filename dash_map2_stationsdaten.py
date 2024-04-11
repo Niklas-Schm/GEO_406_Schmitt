@@ -15,7 +15,7 @@ def etrs_to_latlon(etrs_x, etrs_y):
 
 
 # Connect to the SQLite database
-connection = sqlite3.connect('geo406.db')
+connection = sqlite3.connect('Geo_406_Schmitt.db')
 cursor = connection.cursor()
 
 query = "SELECT Ostwert, Nordwert, Standort, messstellen_nr FROM pegel_meta"
