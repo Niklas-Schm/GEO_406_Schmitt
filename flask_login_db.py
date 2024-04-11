@@ -6,7 +6,7 @@ app = Flask(__name__, template_folder='template')
 app.secret_key = 'secret_key'  # Set a secret key for the session
 
 # Verbindung zur SQLite-Datenbank herstellen
-conn = sqlite3.connect('Login_DB.db', check_same_thread=False)
+conn = sqlite3.connect('Geo_406_Schmitt.db', check_same_thread=False)
 cursor = conn.cursor()
 
 # Tabelle erstellen, falls sie noch nicht existiert
