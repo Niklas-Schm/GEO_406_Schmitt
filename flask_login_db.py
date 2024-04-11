@@ -77,28 +77,26 @@ def register():
         password = request.form['password']
         name = request.form['name']
         surname = request.form['surname']
-
+        if username == admin_name:
+            return render_template('register.html', error='You cannot register as admin.',
+                                   name=name, surname=surname)
         try:
             # Check if the user already exists
             cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
             existing_user = cursor.fetchone()
 
             if existing_user:
-                stored_password = existing_user[2]
-                if bcrypt.checkpw(password.encode('utf-8'), stored_password):
-                    session['username'] = username  # Log in the user immediately
-                    return redirect(url_for('dashboard'))
-                else:
-                    return render_template('register.html', error='Invalid password. Please log in.')
+                return render_template('register.html', error='Username already exists.',
+                                       name=name, surname=surname)  # Pass name and surname back to the form
+            else:
+                # Hash the password and insert into the database
+                hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+                cursor.execute('INSERT INTO users (username, password, name, surname) VALUES (?, ?, ?, ?)',
+                               (username, hashed_password, name, surname))
+                conn.commit()
 
-            # Hash the password and insert into the database
-            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            cursor.execute('INSERT INTO users (username, password, name, surname) VALUES (?, ?, ?, ?)',
-                           (username, hashed_password, name, surname))
-            conn.commit()
-
-            session['username'] = username  # Create a session upon successful registration
-            return render_template('dashboard.html', message='User created. Please log in.')
+                session['username'] = username  # Create a session upon successful registration
+                return redirect(url_for('dashboard'))
 
         except Exception as e:
             print(f"Error during registration: {e}")
@@ -157,3 +155,4 @@ def create_user():
 
 
 app.run()
+# add to register if user exists link to login error message account alreaday exists
