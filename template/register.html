@@ -63,9 +63,9 @@
     {% endif %}
     <form method="POST" action="/register">
         <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required><br>
+        <input type="text" id="name" name="name" value="{{ name }}" required><br>
         <label for="surname">Surname:</label>
-        <input type="text" id="surname" name="surname" required><br>
+        <input type="text" id="surname" name="surname" value="{{ surname }}" required><br>
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required><br>
         <label for="password">Password:</label>
