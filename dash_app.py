@@ -18,7 +18,7 @@ def etrs_to_latlon(etrs_x, etrs_y):
 connection = sqlite3.connect('Geo_406_Schmitt.db')
 cursor = connection.cursor()
 
-query = "SELECT Ostwert, Nordwert, Standort, messstellen_nr FROM pegel_meta"
+query = "SELECT Ostwert, Nordwert, Standort, messstelle_nr FROM pegel_meta"
 data = pd.read_sql(query, connection)
 
 data['lat'], data['lon'] = zip(*data.apply(lambda row: etrs_to_latlon(row['Ostwert'], row['Nordwert']), axis=1))
@@ -47,11 +47,11 @@ def update_plot(clickData):
         # Finde die nächste Station basierend auf den Koordinaten
         station = data[(data['lat'] == lat) & (data['lon'] == lon)]['Standort'].values[0]
         selected_data = data[data['Standort'] == station]
-        selected_station = selected_data['messstellen_nr'].values[0]
+        selected_station = selected_data['messstelle_nr'].values[0]
         print('selected_station', selected_station)
 
         # Connect to the SQLite database
-        connection_pegel = sqlite3.connect('geo406.db')
+        connection_pegel = sqlite3.connect('Geo_406_Schmitt.db')
         cursor_pegel = connection_pegel.cursor()
 
         query_pegel = f"SELECT messstelle_nr, zeit, q FROM pegel_q WHERE messstelle_nr = '{selected_station}'"
