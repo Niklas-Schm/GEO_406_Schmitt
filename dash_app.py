@@ -57,16 +57,15 @@ def update_plot(clickData, data_type):
         station = data[(data['lat'] == lat) & (data['lon'] == lon)]['Standort'].values[0]
         selected_data = data[data['Standort'] == station]
         selected_station = selected_data['messstelle_nr'].values[0]
-        print('selected_station', selected_station)
 
         # Connect to the SQLite database
         connection_pegel = sqlite3.connect('Geo_406_Schmitt.db')
         cursor_pegel = connection_pegel.cursor()
 
-        query_pegel = f"SELECT messstelle_nr, zeit, {data_type} FROM pegel_{data_type} WHERE messstelle_nr = '{selected_station}'"
+        query_pegel = (f"SELECT messstelle_nr, zeit, {data_type} FROM pegel_{data_type} "
+                       f"WHERE messstelle_nr = '{selected_station}'")
         data_pegel = pd.read_sql(query_pegel, connection_pegel)
         connection_pegel.close()
-        print('data_pegel', data_pegel)
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=data_pegel['zeit'], y=data_pegel[data_type], mode='lines+markers', name=station))
