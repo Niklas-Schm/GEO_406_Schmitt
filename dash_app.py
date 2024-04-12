@@ -30,6 +30,14 @@ app = dash.Dash(__name__)
 # Layout der App definieren
 app.layout = html.Div([
     dcc.Graph(id='map', style={'height': '600px'}),
+    dcc.Dropdown(
+        id='data-type',
+        options=[
+            {'label': 'Pegel Q', 'value': 'q'},
+            {'label': 'Pegel W', 'value': 'w'}
+        ],
+        value='q'
+    ),
     dcc.Graph(id='plot')
 ])
 
@@ -37,9 +45,10 @@ app.layout = html.Div([
 # Callback-Funktion für die Interaktion mit der Karte
 @app.callback(
     Output('plot', 'figure'),
-    [Input('map', 'clickData')]
+    [Input('map', 'clickData'),
+     Input('data-type', 'value')]
 )
-def update_plot(clickData):
+def update_plot(clickData, data_type):
     if clickData is not None:
         # Klickposition holen
         lat = clickData['points'][0]['lat']
@@ -54,16 +63,16 @@ def update_plot(clickData):
         connection_pegel = sqlite3.connect('Geo_406_Schmitt.db')
         cursor_pegel = connection_pegel.cursor()
 
-        query_pegel = f"SELECT messstelle_nr, zeit, q FROM pegel_q WHERE messstelle_nr = '{selected_station}'"
+        query_pegel = f"SELECT messstelle_nr, zeit, {data_type} FROM pegel_{data_type} WHERE messstelle_nr = '{selected_station}'"
         data_pegel = pd.read_sql(query_pegel, connection_pegel)
         connection_pegel.close()
         print('data_pegel', data_pegel)
 
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=data_pegel['zeit'], y=data_pegel['q'], mode='lines+markers', name=station))
+        fig.add_trace(go.Scatter(x=data_pegel['zeit'], y=data_pegel[data_type], mode='lines+markers', name=station))
         fig.update_layout(title=f'Zeitreihe für {station}',
                           xaxis_title='Zeit',
-                          yaxis_title='q')
+                          yaxis_title=data_type.upper())
 
         return fig
     else:
