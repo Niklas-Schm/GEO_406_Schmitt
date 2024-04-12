@@ -120,6 +120,7 @@ def read_meta_data(path, connection, cursor):
         INSERT INTO pegel_meta (MesstellenNr, Standort, Gewaesser, Einzugsgebiet_Oberirdisch, Status, 
         Entfernung_Muendung, Messnetz_Kurzname, Ostwert, Nordwert, MB, MS1, MS2, MS3)
         VALUES (?,''' + ','.join(['?'] * 12) + ')', data.values)
+    cursor.execute("ALTER TABLE pegel_meta RENAME COLUMN MesstellenNr TO messstelle_nr")
     connection.commit()
 
 
