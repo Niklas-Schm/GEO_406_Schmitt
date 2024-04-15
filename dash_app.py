@@ -165,13 +165,20 @@ def update_statistic(clickData, data_type):
         data_pegel = pd.read_sql(query_pegel, connection_pegel)
         connection_pegel.close()
 
-        mean = data_pegel[data_type].mean()
+        mean = round(data_pegel[data_type].mean(), 3)
         max_value = data_pegel[data_type].max()
         min_value = data_pegel[data_type].min()
+        std = round(data_pegel[data_type].std(), 3)
+        q25 = data_pegel[data_type].quantile(0.25)
+        q50 = data_pegel[data_type].quantile(0.5)
+        q75 = data_pegel[data_type].quantile(0.75)
 
         statistic_table = html.Table([
-            html.Tr([html.Th('Mean'), html.Th('Max'), html.Th('Min')]),
-            html.Tr([html.Td(round(mean, 3)), html.Td(max_value), html.Td(min_value)])
+            html.Tr([html.Th('Mean'), html.Th('Max'), html.Th('Min'), html.Th('Std'),
+                     html.Th('25%'), html.Th('50%'), html.Th('75%')]),
+            html.Tr([html.Td(mean), html.Td(max_value), html.Td(min_value), html.Td(std),
+                     html.Td(q25), html.Td(q50), html.Td(q75)]
+                    )
         ], style={'margin': '20px auto'})
 
         return statistic_table
