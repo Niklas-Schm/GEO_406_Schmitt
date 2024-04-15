@@ -173,13 +173,23 @@ def update_statistic(clickData, data_type):
         q50 = data_pegel[data_type].quantile(0.5)
         q75 = data_pegel[data_type].quantile(0.75)
 
-        statistic_table = html.Table([
-            html.Tr([html.Th('Mean'), html.Th('Max'), html.Th('Min'), html.Th('Std'),
-                     html.Th('25%'), html.Th('50%'), html.Th('75%')]),
-            html.Tr([html.Td(mean), html.Td(max_value), html.Td(min_value), html.Td(std),
-                     html.Td(q25), html.Td(q50), html.Td(q75)]
-                    )
-        ], style={'margin': '20px auto'})
+        statistic_table = dash_table.DataTable(
+            data=[
+                {'Statistic': 'Mean', 'Value': mean},
+                {'Statistic': 'Max', 'Value': max_value},
+                {'Statistic': 'Min', 'Value': min_value},
+                {'Statistic': 'Std', 'Value': std},
+                {'Statistic': '25%', 'Value': q25},
+                {'Statistic': '50%', 'Value': q50},
+                {'Statistic': '75%', 'Value': q75}
+            ],
+            columns=[
+                {'name': 'Statistic', 'id': 'Statistic'},
+                {'name': 'Value', 'id': 'Value'}
+            ],
+            style_table={'width': '50%', 'margin': 'auto'},
+            style_cell={'textAlign': 'center'},
+        )
 
         return statistic_table
     else:
