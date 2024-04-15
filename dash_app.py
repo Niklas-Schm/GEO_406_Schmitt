@@ -133,9 +133,8 @@ def update_metadata_table(clickData):
             columns=[{'name': col, 'id': col} for col in selected_df.columns],
             data=selected_df.to_dict('records'),
             style_cell={'textAlign': 'center'},
-            style_table={'margin': '20px'}
+            style_table={'margin': '20px auto'}
         )
-        print(meta_table)
         return meta_table
     else:
         return html.Div('No data selected', style={'margin': '20px'})
