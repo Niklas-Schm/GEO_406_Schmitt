@@ -70,11 +70,13 @@ def update_plot(clickData, data_type):
         data_pegel = pd.read_sql(query_pegel, connection_pegel)
         connection_pegel.close()
 
+        y_axis_name = 'Durchfluss in m³/s' if data_type == 'q' else 'Wasserstand in cm'
+
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=data_pegel['zeit'], y=data_pegel[data_type], mode='lines+markers', name=station))
         fig.update_layout(title=f'Zeitreihe für {station}',
                           xaxis_title='Zeit',
-                          yaxis_title=data_type.upper())
+                          yaxis_title=y_axis_name)
 
         return fig
     else:
