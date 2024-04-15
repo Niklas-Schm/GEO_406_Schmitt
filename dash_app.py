@@ -90,7 +90,7 @@ def update_map(clickData):
                             lat='lat',
                             lon='lon',
                             hover_name='Standort',
-                            hover_data={'messstelle_nr': True},  # Add messtelle_nr to hover data
+                            hover_data={'messstelle_nr': True},
                             zoom=5)
     fig.update_traces(hovertemplate='Standort: %{hovertext}<br>'
                                     'lat: %{lat}<br>'
