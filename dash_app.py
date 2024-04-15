@@ -31,7 +31,7 @@ app = dash.Dash(__name__)
 # Layout der App definieren
 app.layout = html.Div([
     dcc.Graph(id='map', style={'height': '600px'}),
-    html.Div(id='metadata-table', style={'textAlign': 'center'}),
+    html.Div(id='meta_table', style={'textAlign': 'center'}),
     dcc.Dropdown(
         id='data-type',
         options=[
@@ -92,13 +92,17 @@ def update_map(clickData):
                             hover_name='Standort',
                             hover_data={'messstelle_nr': True},  # Add messtelle_nr to hover data
                             zoom=5)
+    fig.update_traces(hovertemplate='Standort: %{hovertext}<br>'
+                                    'lat: %{lat}<br>'
+                                    'lon: %{lon}<br>'
+                                    'ID: %{customdata[0]}')
     fig.update_layout(mapbox_style="open-street-map")
     return fig
 
 
 # Callback-Funktion für das Aktualisieren der Metadaten-Tabelle
 @app.callback(
-    Output('metadata-table', 'children'),
+    Output('meta_table', 'children'),
     [Input('map', 'clickData')]
 )
 def update_metadata_table(clickData):
@@ -110,26 +114,31 @@ def update_metadata_table(clickData):
         cursor_meta = connection_meta.cursor()
 
         # Construct and execute the SQL query
-        query_meta = f"SELECT messstelle_nr, Standort, Gewaesser FROM pegel_meta WHERE messstelle_nr = '{mess_id}' "
+        query_meta = f"SELECT * FROM pegel_meta WHERE messstelle_nr = '{mess_id}' "
         cursor_meta.execute(query_meta)
         selected_data = cursor_meta.fetchall()
 
         # Convert selected_data to DataFrame
-        selected_df = pd.DataFrame(selected_data, columns=['messstelle_nr', 'Standort', 'Gewaesser'])
+        selected_df = pd.DataFrame(selected_data, columns=['messstelle_nr', 'Standort', 'Gewaesser',
+                                                           'Einzugsgebiet_Oberirdisch', 'Status', 'Entfernung_Muendung',
+                                                           'Messnetz_Kurzname', 'Ostwert', 'Nordwert', 'MB', 'MS1',
+                                                           'MS2', 'MS3'])
 
         # Close the cursor and connection
         cursor_meta.close()
         connection_meta.close()
 
         # Convert DataFrame to DataTable
-        table = dash_table.DataTable(
-            id='table',
+        meta_table = dash_table.DataTable(
             columns=[{'name': col, 'id': col} for col in selected_df.columns],
             data=selected_df.to_dict('records'),
+            style_cell={'textAlign': 'center'},
+            style_table={'margin': '20px'}
         )
-        return table
+        print(meta_table)
+        return meta_table
     else:
-        return html.Div('No data selected')
+        return html.Div('No data selected', style={'margin': '20px'})
 
 
 # App starten
