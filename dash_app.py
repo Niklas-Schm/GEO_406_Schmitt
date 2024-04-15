@@ -1,6 +1,7 @@
 import sqlite3
 
 import dash
+from dash import dash_table
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
@@ -30,6 +31,7 @@ app = dash.Dash(__name__)
 # Layout der App definieren
 app.layout = html.Div([
     dcc.Graph(id='map', style={'height': '600px'}),
+    html.Div(id='metadata-table', style={'textAlign': 'center'}),
     dcc.Dropdown(
         id='data-type',
         options=[
@@ -84,9 +86,50 @@ def update_plot(clickData, data_type):
     [Input('plot', 'clickData')]
 )
 def update_map(clickData):
-    fig = px.scatter_mapbox(data, lat='lat', lon='lon', hover_name='Standort', zoom=5)
+    fig = px.scatter_mapbox(data,
+                            lat='lat',
+                            lon='lon',
+                            hover_name='Standort',
+                            hover_data={'messstelle_nr': True},  # Add messtelle_nr to hover data
+                            zoom=5)
     fig.update_layout(mapbox_style="open-street-map")
     return fig
+
+
+# Callback-Funktion für das Aktualisieren der Metadaten-Tabelle
+@app.callback(
+    Output('metadata-table', 'children'),
+    [Input('map', 'clickData')]
+)
+def update_metadata_table(clickData):
+    if clickData is not None:
+        mess_id = clickData['points'][0]['customdata'][0]
+
+        # Connect to the SQLite database inside the callback
+        connection_meta = sqlite3.connect('Geo_406_Schmitt.db')
+        cursor_meta = connection_meta.cursor()
+
+        # Construct and execute the SQL query
+        query_meta = f"SELECT messstelle_nr, Standort, Gewaesser FROM pegel_meta WHERE messstelle_nr = '{mess_id}' "
+        cursor_meta.execute(query_meta)
+        selected_data = cursor_meta.fetchall()
+
+        # Convert selected_data to DataFrame
+        selected_df = pd.DataFrame(selected_data, columns=['messstelle_nr', 'Standort', 'Gewaesser'])
+
+        # Close the cursor and connection
+        cursor_meta.close()
+        connection_meta.close()
+
+        # Convert DataFrame to DataTable
+        table = dash_table.DataTable(
+            id='table',
+            columns=[{'name': col, 'id': col} for col in selected_df.columns],
+            data=selected_df.to_dict('records'),
+        )
+        return table
+    else:
+        return html.Div()
 
 
 # App starten
