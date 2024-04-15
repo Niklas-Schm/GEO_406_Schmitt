@@ -169,9 +169,9 @@ def update_statistic(clickData, data_type):
         max_value = data_pegel[data_type].max()
         min_value = data_pegel[data_type].min()
         std = round(data_pegel[data_type].std(), 3)
-        q25 = data_pegel[data_type].quantile(0.25)
-        q50 = data_pegel[data_type].quantile(0.5)
-        q75 = data_pegel[data_type].quantile(0.75)
+        q25 = round(data_pegel[data_type].quantile(0.25), 3)
+        q50 = round(data_pegel[data_type].quantile(0.5), 3)
+        q75 = round(data_pegel[data_type].quantile(0.75), 3)
 
         statistic_table = dash_table.DataTable(
             data=[
