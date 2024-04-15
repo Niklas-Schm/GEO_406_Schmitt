@@ -127,9 +127,10 @@ def update_metadata_table(clickData):
             columns=[{'name': col, 'id': col} for col in selected_df.columns],
             data=selected_df.to_dict('records'),
         )
+
         return table
     else:
-        return html.Div()
+        return html.Div('No data selected')
 
 
 # App starten
