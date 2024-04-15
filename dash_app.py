@@ -40,7 +40,8 @@ app.layout = html.Div([
         ],
         value='q'
     ),
-    dcc.Graph(id='plot')
+    dcc.Graph(id='plot'),
+    html.Div(id='statistic_table', style={'textAlign': 'center'})
 ])
 
 
@@ -136,6 +137,44 @@ def update_metadata_table(clickData):
             style_table={'margin': '20px auto'}
         )
         return meta_table
+    else:
+        return html.Div('No data selected', style={'margin': '20px'})
+
+
+@app.callback(
+    Output('statistic_table', 'children'),
+    [Input('map', 'clickData'),
+     Input('data-type', 'value')]
+)
+def update_statistic(clickData, data_type):
+    if clickData is not None:
+        # Klickposition holen
+        lat = clickData['points'][0]['lat']
+        lon = clickData['points'][0]['lon']
+        # Finde die nächste Station basierend auf den Koordinaten
+        station = data[(data['lat'] == lat) & (data['lon'] == lon)]['Standort'].values[0]
+        selected_data = data[data['Standort'] == station]
+        selected_station = selected_data['messstelle_nr'].values[0]
+
+        # Connect to the SQLite database
+        connection_pegel = sqlite3.connect('Geo_406_Schmitt.db')
+        cursor_pegel = connection_pegel.cursor()
+
+        query_pegel = (f"SELECT messstelle_nr, zeit, {data_type} FROM pegel_{data_type} "
+                       f"WHERE messstelle_nr = '{selected_station}'")
+        data_pegel = pd.read_sql(query_pegel, connection_pegel)
+        connection_pegel.close()
+
+        mean = data_pegel[data_type].mean()
+        max_value = data_pegel[data_type].max()
+        min_value = data_pegel[data_type].min()
+
+        statistic_table = html.Table([
+            html.Tr([html.Th('Mean'), html.Th('Max'), html.Th('Min')]),
+            html.Tr([html.Td(round(mean, 3)), html.Td(max_value), html.Td(min_value)])
+        ], style={'margin': '20px auto'})
+
+        return statistic_table
     else:
         return html.Div('No data selected', style={'margin': '20px'})
 
