@@ -186,8 +186,8 @@ def update_statistic(clickData, data_type):
                 {'Statistic': '75%', 'Value': q75}
             ],
             columns=[
-                {'name': 'Statistic', 'id': 'Statistic'},
-                {'name': 'Value', 'id': 'Value'}
+                {'name': 'Statistik', 'id': 'Statistic'},
+                {'name': 'Wert', 'id': 'Value'}
             ],
             style_table={'width': '50%', 'margin': 'auto'},
             style_cell={'textAlign': 'center'},
