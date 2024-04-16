@@ -40,6 +40,10 @@ app.layout = html.Div([
         ],
         value='q'
     ),
+    html.Div([
+        html.Button("Download CSV", id="btn_csv"),
+        dcc.Download(id="download-dataframe-csv"),
+    ]),
     dcc.Graph(id='plot'),
     html.Div(id='statistic_table', style={'textAlign': 'center'})
 ])
@@ -196,6 +200,31 @@ def update_statistic(clickData, data_type):
         return statistic_table
     else:
         return html.Div('No data selected', style={'margin': '20px'})
+
+
+@app.callback(
+    Output("download-dataframe-csv", "data"),
+    [Input("btn_csv", "n_clicks")],
+    [Input('map', 'clickData')],
+    [dash.dependencies.State("data-type", "value")]
+)
+def download_data(n_clicks, clickData, data_type):
+    if clickData:
+        mess_id = clickData['points'][0]['customdata'][0]
+
+        if n_clicks:
+            # Connect to the SQLite database inside the callback
+            connection_download = sqlite3.connect('Geo_406_Schmitt.db')
+            cursor_download = connection_download.cursor()
+
+            # Construct and execute the SQL query
+            query_meta = f"SELECT * FROM pegel_{data_type} WHERE messstelle_nr = '{mess_id}' "
+            cursor_download.execute(query_meta)
+            data_download = cursor_download.fetchall()
+            download_df = pd.DataFrame(data_download, columns=['messstelle_nr', 'zeit', data_type,
+                                                               f'{data_type}_min', f'{data_type}_max'])
+
+            return dcc.send_data_frame(download_df.to_csv, f"{mess_id}_{data_type}.csv")
 
 
 # App starten
