@@ -62,7 +62,6 @@ def update_plot(clickData, data_type):
 
         # Connect to the SQLite database
         connection_pegel = sqlite3.connect('Geo_406_Schmitt.db')
-        cursor_pegel = connection_pegel.cursor()
 
         query_pegel = (f"SELECT messstelle_nr, zeit, {data_type} FROM pegel_{data_type} "
                        f"WHERE messstelle_nr = '{selected_station_id}'")
