@@ -215,6 +215,7 @@ def download_data(n_clicks, clickData, data_type):
             query_meta = f"SELECT * FROM pegel_{data_type} WHERE messstelle_nr = '{mess_id}' "
             cursor_download.execute(query_meta)
             data_download = cursor_download.fetchall()
+            connection_download.close()
             download_df = pd.DataFrame(data_download, columns=['messstelle_nr', 'zeit', data_type,
                                                                f'{data_type}_min', f'{data_type}_max'])
 
