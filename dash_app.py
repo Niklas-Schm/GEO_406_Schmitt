@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 import pyproj
-from dash import dcc, html, Input, Output
+from dash import dcc, html, Input, Output, State
 
 
 def etrs_to_latlon(etrs_x, etrs_y):
@@ -199,27 +199,27 @@ def update_statistic(clickData, data_type):
 @app.callback(
     Output("download-dataframe-csv", "data"),
     [Input("btn_csv", "n_clicks")],
-    [Input('map', 'clickData')],
-    [dash.dependencies.State("data-type", "value")]
+    [State('map', 'clickData')],
+    [State("data-type", "value")]
 )
 def download_data(n_clicks, clickData, data_type):
-    if clickData:
+    if clickData and n_clicks:
         mess_id = clickData['points'][0]['customdata'][0]
 
-        if n_clicks:
-            # Connect to the SQLite database inside the callback
-            connection_download = sqlite3.connect('Geo_406_Schmitt.db')
-            cursor_download = connection_download.cursor()
+        n_clicks = None
+        # Connect to the SQLite database inside the callback
+        connection_download = sqlite3.connect('Geo_406_Schmitt.db')
+        cursor_download = connection_download.cursor()
+        # Construct and execute the SQL query
+        query_meta = f"SELECT * FROM pegel_{data_type} WHERE messstelle_nr = '{mess_id}' "
+        cursor_download.execute(query_meta)
+        data_download = cursor_download.fetchall()
+        connection_download.close()
+        download_df = pd.DataFrame(data_download, columns=['messstelle_nr', 'zeit', data_type,
+                                                           f'{data_type}_min', f'{data_type}_max'])
 
-            # Construct and execute the SQL query
-            query_meta = f"SELECT * FROM pegel_{data_type} WHERE messstelle_nr = '{mess_id}' "
-            cursor_download.execute(query_meta)
-            data_download = cursor_download.fetchall()
-            connection_download.close()
-            download_df = pd.DataFrame(data_download, columns=['messstelle_nr', 'zeit', data_type,
-                                                               f'{data_type}_min', f'{data_type}_max'])
-
-            return dcc.send_data_frame(download_df.to_csv, f"{mess_id}_{data_type}.csv")
+        return dcc.send_data_frame(download_df.to_csv, f"{mess_id}_{data_type}.csv")
+    return None
 
 
 # App starten
