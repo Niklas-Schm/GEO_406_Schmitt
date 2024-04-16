@@ -57,28 +57,24 @@ app.layout = html.Div([
 )
 def update_plot(clickData, data_type):
     if clickData is not None:
-        # Klickposition holen
-        lat = clickData['points'][0]['lat']
-        lon = clickData['points'][0]['lon']
-        # Finde die nächste Station basierend auf den Koordinaten
-        station = data[(data['lat'] == lat) & (data['lon'] == lon)]['Standort'].values[0]
-        selected_data = data[data['Standort'] == station]
-        selected_station = selected_data['messstelle_nr'].values[0]
+        selected_station_id = clickData['points'][0]['customdata'][0]
+        station_name = clickData['points'][0]['hovertext']
 
         # Connect to the SQLite database
         connection_pegel = sqlite3.connect('Geo_406_Schmitt.db')
         cursor_pegel = connection_pegel.cursor()
 
         query_pegel = (f"SELECT messstelle_nr, zeit, {data_type} FROM pegel_{data_type} "
-                       f"WHERE messstelle_nr = '{selected_station}'")
+                       f"WHERE messstelle_nr = '{selected_station_id}'")
         data_pegel = pd.read_sql(query_pegel, connection_pegel)
         connection_pegel.close()
 
         y_axis_name = 'Durchfluss in m³/s' if data_type == 'q' else 'Wasserstand in cm'
 
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=data_pegel['zeit'], y=data_pegel[data_type], mode='lines+markers', name=station))
-        fig.update_layout(title=f'Zeitreihe für {station}',
+        fig.add_trace(
+            go.Scatter(x=data_pegel['zeit'], y=data_pegel[data_type], mode='lines+markers', name=station_name))
+        fig.update_layout(title=f'Zeitreihe für {station_name}',
                           xaxis_title='Zeit',
                           yaxis_title=y_axis_name)
 
