@@ -27,7 +27,7 @@ data['size'] = 10
 connection.close()
 
 # Dash-App initialisieren
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, url_base_pathname='/dash/')
 # Layout der App definieren
 app.layout = html.Div([
     dcc.Graph(id='map', style={'height': '600px'}),
@@ -223,4 +223,4 @@ def download_data(n_clicks, clickData, data_type):
 
 
 # App starten
-app.run_server(debug=True)
+app.run_server(debug=True, port=5000)
