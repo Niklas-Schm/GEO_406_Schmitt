@@ -1,0 +1,18 @@
+name: GEO_406
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.12
+  - anaconda::flask
+  - ca-certificates
+  - openssl
+  - werkzeug==2.3.8
+  - pandas=2.1.4
+  - anaconda::bcrypt
+  - anaconda::openpyxl
+  - conda-forge::dash
+  - conda-forge::pyarrow
+  - certifi
+  - conda-forge::dash-bootstrap-components
+  - anaconda::sqlite
