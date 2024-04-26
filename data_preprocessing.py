@@ -12,12 +12,11 @@ db_path = current_directory / 'Geo_406_Schmitt.db'
 
 def create_tables(connection, cursor):
     """
-    Create necessary tables in the SQLite database if they do not exist.
+    Creates the necessary tables in the database if they don't already exist.
 
     Args:
-        cursor: Cursor object to execute SQL commands.
-        :param cursor:
-        :param connection:
+        connection: A connection object to the database.
+        cursor: A cursor object for executing SQL commands.
     """
     cursor.execute('''CREATE TABLE IF NOT EXISTS pegel_q(
         messstelle_nr TEXT,
@@ -54,12 +53,11 @@ def create_tables(connection, cursor):
 
 def clear_tabels(connection, cursor):
     """
-    Clear the pegel_q and pegel_w tables in the SQLite database.
+    Clears all data from the tables 'pegel_q', 'pegel_w', and 'pegel_meta' in the database.
 
     Args:
-        cursor: Cursor object to execute SQL commands.
-        :param cursor:
-        :param connection:
+        connection: A connection object to the database.
+        cursor: A cursor object for executing SQL commands.
     """
     cursor.execute('''DELETE FROM pegel_q''')
     cursor.execute('''DELETE FROM pegel_w''')
@@ -68,6 +66,19 @@ def clear_tabels(connection, cursor):
 
 
 def read_calc(path, art, connection, cursor):
+    """
+    Reads data from a file specified by the path, processes it, and inserts it into a database.
+
+    Args:
+        path (str): The path to the file containing the data.
+        art (str): The type of data being processed ('q' or 'w').
+        connection: A connection object to the database.
+        cursor: A cursor object for executing SQL commands.
+
+    Returns:
+        tuple: A tuple containing the sum of values, the count of values, the maximum value,
+               the minimum value, and the type of data processed (art).
+    """
     min_wert = None
     max_wert = None
     if art == 'q':
@@ -104,14 +115,12 @@ def read_calc(path, art, connection, cursor):
 
 def read_meta_data(path, connection, cursor):
     """
-    Read the meta data from the Excel file and insert it into the pegel_meta table in the SQLite database.
+    Reads metadata from an Excel file, and inserts it into the 'pegel_meta' table in the database.
 
     Args:
-        path: Path to the Excel file.
-        cursor: Cursor object to execute SQL commands.
-        :param cursor: 
-        :param path: 
-        :param connection:
+        path (str): The path to the Excel file containing the metadata.
+        connection: A connection object to the database.
+        cursor: A cursor object for executing SQL commands.
     """
     data = pd.read_excel(path)
     data = data.where(pd.notnull(data), None)
