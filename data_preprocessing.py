@@ -33,7 +33,7 @@ def create_tables(connection, cursor):
         w_max INTEGER
         )''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS pegel_meta(
-        MesstellenNr INTEGER,
+        messstelle_nr INTEGER,
         Standort TEXT,
         Gewaesser TEXT,
         Einzugsgebiet_Oberirdisch REAL,
@@ -82,11 +82,9 @@ def read_calc(path, art, connection, cursor):
     min_wert = None
     max_wert = None
     if art == 'q':
-        wert = 'q'
         min_wert = 'q_min'
         max_wert = 'q_max'
     elif art == 'w':
-        wert = 'w'
         min_wert = 'w_min'
         max_wert = 'w_max'
 
@@ -126,32 +124,37 @@ def read_meta_data(path, connection, cursor):
     data = data.where(pd.notnull(data), None)
 
     cursor.executemany('''
-        INSERT INTO pegel_meta (MesstellenNr, Standort, Gewaesser, Einzugsgebiet_Oberirdisch, Status, 
+        INSERT INTO pegel_meta (messstelle_nr, Standort, Gewaesser, Einzugsgebiet_Oberirdisch, Status, 
         Entfernung_Muendung, Messnetz_Kurzname, Ostwert, Nordwert, MB, MS1, MS2, MS3)
         VALUES (?,''' + ','.join(['?'] * 12) + ')', data.values)
-    cursor.execute("ALTER TABLE pegel_meta RENAME COLUMN MesstellenNr TO messstelle_nr")
     connection.commit()
 
 
+# Connect to the database
 conn = sqlite3.connect(db_path)
 curs = conn.cursor()
+
+# Create and clear tables
 create_tables(conn, curs)
 clear_tabels(conn, curs)
 
+# Create lists of files to process
 q_files = [file for file in data_path.iterdir() if 'q' in file.name]
 w_files = [file for file in data_path.iterdir() if 'w' in file.name]
 
+# Process files
 for file in q_files:
     try:
-        read_calc(file, 'q', conn, curs)
+        read_calc(str(file), 'q', conn, curs)
     except Exception as e:
         print(f"Error processing {file}: {e}")
 
 for file in w_files:
     try:
-        read_calc(file, 'w', conn, curs)
+        read_calc(str(file), 'w', conn, curs)
     except Exception as e:
         print(f"Error processing {file}: {e}")
 
-read_meta_data(meta_data_path, conn, curs)
+# Process metadata
+read_meta_data(str(meta_data_path), conn, curs)
 conn.close()
