@@ -111,12 +111,12 @@ def index():
             else:
                 return render_template('index_login_db.html', error='Invalid password')
 
-        # Daten aus der Datenbank abrufen
+        # Check if the user exists in the database
         cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
         user = cursor.fetchone()
 
         if user:
-            stored_password = user[2]  # Index 2 entspricht dem verschlüsselten Passwort in der Datenbank
+            stored_password = user[2]  # Index 2 is the password
             if bcrypt.checkpw(password.encode('utf-8'), stored_password):
                 session['username'] = username  # Create a session upon successful login
                 return redirect(url_for('dashboard'))
@@ -420,10 +420,10 @@ def update_statistic(clickData, data_type):
         html.Div: A message indicating that no data is selected.
     """
     if clickData is not None:
-        # Klickposition holen
+        # Get the coordinates of the clicked point
         lat = clickData['points'][0]['lat']
         lon = clickData['points'][0]['lon']
-        # Finde die nächste Station basierend auf den Koordinaten
+        # Get the station name
         station = data[(data['lat'] == lat) & (data['lon'] == lon)]['Standort'].values[0]
         selected_data = data[data['Standort'] == station]
         selected_station = selected_data['messstelle_nr'].values[0]
@@ -504,4 +504,4 @@ def download_data(n_clicks, clickData, data_type):
 
 
 # Run the Flask app
-app.run(debug=True, port=5000)
+app.run(debug=False, port=5000)
