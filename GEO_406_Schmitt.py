@@ -221,6 +221,7 @@ def view_database():
 def edit(user_id):
     """
     Handles editing user information.
+    username is not editable.
 
     Args:
         user_id (int): The ID of the user to edit.
