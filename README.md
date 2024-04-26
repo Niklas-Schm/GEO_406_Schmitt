@@ -9,9 +9,7 @@ der definierten Projektziele. Zur Umsetzung dieses Projekts wurde Python
 
 ## Installationsanleitung:
 
-Die benötigten Dateien stehen in der Uni-Cloud unter [diesem Link](https://cloud.uni-jena.de/s/EwPqQWKJqjQ4yC3) zum
-Download zur Verfügung. Zudem steht ein GitHub Repository zur Verfügung unter
-[diesem Link](https://github.com/Niklas-Schm/GEO_406_Schmitt). Nachdem der Ordner `GEO_406_Schmitt` heruntergeladen und 
+Nachdem der Ordner `GEO_406_Schmitt` heruntergeladen und 
 entpackt wurde, muss ein passendes Python Environment erstellt werden. Hierzu
 wird die Datei `GEO_406_Schmitt.yml` genutzt. Nun muss ein passendes 
 Environment in Anaconda erstellt werden:
