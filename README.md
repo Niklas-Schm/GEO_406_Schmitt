@@ -1,8 +1,6 @@
 # Einleitung:
 
-Der nachfolgende Bericht dokumentiert die Entwicklung einer web-basierten
-Software zur Verwaltung von Zeitreihendaten unter Verwendung von Python, 
-Flask und Dash. Ziel des Projektes war die Implementierung verschiedener 
+Ziel des Projektes ist die Implementierung verschiedener 
 Funktionen, darunter die Benutzerverwaltung, Visualisierung von Daten, 
 statistische Analysen und die Bereitstellung einer Downloadfunktion. 
 Dieser Bericht beschreibt die umgesetzten Features sowie die Erfüllung 
