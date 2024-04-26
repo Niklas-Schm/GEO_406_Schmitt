@@ -14,7 +14,9 @@ entpackt wurde, muss ein passendes Python Environment erstellt werden. Hierzu
 wird die Datei `GEO_406_Schmitt.yml` genutzt. Nun muss ein passendes 
 Environment in Anaconda erstellt werden:
 
+```
 conda env create -f GEO_406_Schmitt.yml
+```
 
 Die Ordnerstruktur des Projekts darf nicht verändert werden und soll wie in Abbildung 1 dargestellt aussehen.
 
