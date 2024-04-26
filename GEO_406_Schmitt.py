@@ -160,7 +160,7 @@ def register():
     Handles user registration.
 
     GET: Renders the registration page.
-    POST: Processes user registration form, checks for existing users, hashes password, and inserts user into the database.
+    POST: Processes user registration form, checks for existing users, hashes password, and inserts into the database.
 
     Returns:
         render_template: Renders the registration template if registration fails.
@@ -488,7 +488,6 @@ def download_data(n_clicks, clickData, data_type):
     if clickData and n_clicks:
         mess_id = clickData['points'][0]['customdata'][0]
 
-        n_clicks = None
         # Connect to the SQLite database inside the callback
         connection_download = sqlite3.connect('Geo_406_Schmitt.db')
         cursor_download = connection_download.cursor()
