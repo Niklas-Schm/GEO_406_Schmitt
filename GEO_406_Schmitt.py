@@ -9,13 +9,23 @@ from dash import dcc, html, Input, Output, State
 from flask import Flask, render_template, request, redirect, url_for, session
 from dash import dash_table
 
+# initialize the Flask app
 app = Flask(__name__, template_folder='template')
 app.secret_key = 'secret_key'
-
 server = app
 
 
 def etrs_to_latlon(etrs_x, etrs_y):
+    """
+    Converts coordinates from ETRS89 (EPSG:25832) to latitude and longitude (EPSG:4326).
+
+    Args:
+        etrs_x (float): ETRS89 x-coordinate.
+        etrs_y (float): ETRS89 y-coordinate.
+
+    Returns:
+        tuple: Latitude and longitude as a tuple (lat, lon).
+    """
     transformer = pyproj.Transformer.from_crs("epsg:25832", "epsg:4326", always_xy=True)
     lon, lat = transformer.transform(etrs_x, etrs_y)
     return lat, lon
@@ -23,7 +33,6 @@ def etrs_to_latlon(etrs_x, etrs_y):
 
 # Connect to the SQLite database
 connection = sqlite3.connect('Geo_406_Schmitt.db')
-cursor = connection.cursor()
 
 query = "SELECT Ostwert, Nordwert, Standort, messstelle_nr FROM pegel_meta"
 data = pd.read_sql(query, connection)
@@ -48,14 +57,17 @@ cursor.execute('''
 ''')
 conn.commit()
 
+# Admin Username and Password
 admin_name = 'admin'
 admin_password = 'admin'
 
 # Dash App initialization
 dash_app = dash.Dash(__name__, server=server, url_base_pathname='/dash/')
+
+# Dash App Layout definition
 dash_app.layout = html.Div([
     html.Div([
-        html.A("Logout", href="/logout")  # Add this line for logout link
+        html.A("Logout", href="/logout")
     ]),
     dcc.Graph(id='map', style={'height': '600px'}),
     html.Div(id='meta_table', style={'textAlign': 'center'}),
@@ -79,6 +91,15 @@ dash_app.layout = html.Div([
 # Flask routes
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    """
+    Handles the index route for the application.
+
+    GET: Renders the login page.
+    POST: Processes login credentials, checks against the database, and redirects to appropriate routes.
+
+    Returns:
+        render_template: Renders the appropriate template.
+    """
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -109,6 +130,12 @@ def index():
 
 @app.route('/dashboard')
 def dashboard():
+    """
+    Renders the dashboard page if the user is authenticated, otherwise redirects to the index page.
+
+    Returns:
+        render_template: Renders the dashboard template if the user is authenticated, else redirects to the index page.
+    """
     if 'username' in session:
         return dash_app.index()
     else:
@@ -117,12 +144,28 @@ def dashboard():
 
 @app.route('/logout')
 def logout():
+    """
+    Logs out the user by clearing the session and redirects to the index page.
+
+    Returns:
+        redirect: Redirects the user to the index page after clearing the session.
+    """
     session.pop('username', None)  # Clear the session upon logout
     return redirect(url_for('index'))
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """
+    Handles user registration.
+
+    GET: Renders the registration page.
+    POST: Processes user registration form, checks for existing users, hashes password, and inserts user into the database.
+
+    Returns:
+        render_template: Renders the registration template if registration fails.
+        redirect: Redirects the user to the dashboard if registration is successfully.
+    """
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -158,6 +201,13 @@ def register():
 
 @app.route('/admin/database')
 def view_database():
+    """
+    Renders the database view page for admin.
+
+    Returns:
+        render_template: Renders the database template with user data fetched from the database.
+        redirect: Redirects non-admin users to the index page.
+    """
     if 'username' in session and session['username'] == 'admin':
         cursor.execute('SELECT * FROM users')
         users = cursor.fetchall()
@@ -169,6 +219,16 @@ def view_database():
 
 @app.route('/edit/<int:user_id>', methods=['GET', 'POST'])
 def edit(user_id):
+    """
+    Handles editing user information.
+
+    Args:
+        user_id (int): The ID of the user to edit.
+
+    Returns:
+        render_template: Renders the edit template with user data for GET requests.
+        redirect: Redirects to the view_database route after successful user update for POST requests.
+    """
     if request.method == 'POST':
         password = request.form['password']
         name = request.form['name']
@@ -194,6 +254,15 @@ def edit(user_id):
 
 @app.route('/delete/<int:user_id>')
 def delete(user_id):
+    """
+    Deletes a user from the database.
+
+    Args:
+        user_id (int): The ID of the user to delete.
+
+    Returns:
+        redirect: Redirects to the view_database route after successful deletion.
+    """
     cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
     conn.commit()
 
@@ -202,16 +271,32 @@ def delete(user_id):
 
 @app.route('/create_user')
 def create_user():
+    """
+    Renders the user creation page.
+
+    Returns:
+        render_template: Renders the registration template for creating a new user.
+    """
     return render_template('register.html')
 
 
-# Dash callbacks
+# Dash Callbacks
 @dash_app.callback(
     Output('plot', 'figure'),
     [Input('map', 'clickData'),
      Input('data-type', 'value')]
 )
 def update_plot(clickData, data_type):
+    """
+    Update the plot based on the selected station and data type.
+
+    Args:
+        clickData (dict): Data representing the clicked point on the map.
+        data_type (str): The type of data to display ('q' or 'w').
+
+    Returns:
+        if clicked: dict, a Plotly figure representing the updated plot.
+    """
     if clickData is not None:
         selected_station_id = clickData['points'][0]['customdata'][0]
         station_name = clickData['points'][0]['hovertext']
@@ -238,12 +323,20 @@ def update_plot(clickData, data_type):
         return {}
 
 
-# Callback-Funktion für das Aktualisieren der Karte
 @dash_app.callback(
     Output('map', 'figure'),
     [Input('plot', 'clickData')]
 )
 def update_map(clickData):
+    """
+    Update the map based on the clicked data point.
+
+    Args:
+        clickData (dict): Data representing the clicked point on the plot.
+
+    Returns:
+        dict: A Plotly figure representing the updated map.
+    """
     fig = px.scatter_mapbox(data,
                             lat='lat',
                             lon='lon',
@@ -258,12 +351,22 @@ def update_map(clickData):
     return fig
 
 
-# Callback-Funktion für das Aktualisieren der Metadaten-Tabelle
 @dash_app.callback(
     Output('meta_table', 'children'),
     [Input('map', 'clickData')]
 )
 def update_metadata_table(clickData):
+    """
+    Update the metadata table based on the clicked data point.
+
+    Args:
+        clickData (dict): Data representing the clicked point on the map.
+
+    Returns:
+        meta_table: DataTable representing the metadata of the selected station.
+        or
+        html.Div: A message indicating that no data is selected.
+    """
     if clickData is not None:
         mess_id = clickData['points'][0]['customdata'][0]
 
@@ -304,6 +407,18 @@ def update_metadata_table(clickData):
      Input('data-type', 'value')]
 )
 def update_statistic(clickData, data_type):
+    """
+    Update the statistic table based on the clicked data point and selected data type.
+
+    Args:
+        clickData (dict): Data representing the clicked point on the map.
+        data_type (str): The type of data for which statistics are calculated (e.g., 'q' for flow, 'w' for water level).
+
+    Returns:
+        Statistic table: DataTable representing the statistics of the selected station.
+        or
+        html.Div: A message indicating that no data is selected.
+    """
     if clickData is not None:
         # Klickposition holen
         lat = clickData['points'][0]['lat']
@@ -359,6 +474,17 @@ def update_statistic(clickData, data_type):
     [State("data-type", "value")]
 )
 def download_data(n_clicks, clickData, data_type):
+    """
+    Download the data as a CSV file based on the clicked data point and selected data type.
+
+    Args:
+        n_clicks (int): Number of times the download button has been clicked.
+        clickData (dict): Data representing the clicked point on the map.
+        data_type (str): The type of data for which CSV is generated (e.g., 'q' for flow, 'w' for water level).
+
+    Returns:
+        dict: The CSV file data to be downloaded if the button is clicked and data is selected, otherwise None.
+    """
     if clickData and n_clicks:
         mess_id = clickData['points'][0]['customdata'][0]
 
@@ -378,4 +504,5 @@ def download_data(n_clicks, clickData, data_type):
     return None
 
 
+# Run the Flask app
 app.run(debug=True, port=5000)
